@@ -1,0 +1,24 @@
+FROM debian:9-slim
+
+LABEL author="idma88"
+LABEL version="1.0"
+
+# Add param to start `-v <host_folder>:/<folder>` for share up/download files
+
+RUN apt update && \
+apt install -y wget xz-utils libgio-cil libfontconfig1 libxcb1 libx11-6 libx11-xcb1 && \
+apt autoremove && \
+apt autoclean && \
+mkdir /app && \
+wget https://telegram.org/dl/desktop/linux -O /app/tsetup.tar.xz && \
+tar -xf /app/tsetup.tar.xz -C /app && \
+rm /app/tsetup.tar.xz
+
+# RUN mkdir /download
+# VOLUME /download
+
+# Make sure to enable "Use system frame"
+CMD if [ ! -f tg_conf_done ]; then touch tg_conf_done && ${TG_APP} -tosettings; else ${TG_APP}; fi
+
+ENV DISPLAY=host.docker.internal:0
+ENV TG_APP=/app/Telegram/Telegram
