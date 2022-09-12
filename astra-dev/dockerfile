@@ -2,29 +2,12 @@
 # For example: 
 #   docker run -i -t -v d:\Docker\shared\:/root/dev/ astra-dev
 
-FROM debian:9
+FROM debian:10-slim
 LABEL author="idma88"
 
 ENV DISPLAY=host.docker.internal:0
 
-# Add Astra Linux repo
-RUN echo "deb [trusted=yes] http://download.astralinux.ru/astra/stable/orel/repository/ orel non-free contrib main" >> /etc/apt/sources.list.d/astra.list
-
-# Update & upgrade
-RUN apt update -y && \
-apt upgrade -y && \
-# Install dev tools & libs
-apt install -y \
-    g++-6 \
-    gcc-6 \
-    cmake \
-    gdb \
-    qtdeclarative5-dev \
-    clang-format-11 && \
-# Cleanup
-apt autoremove -y && \
-apt autoclean -y && \
-# Make alias "clang-format" to "clang-format-11"
-ln -s /usr/bin/clang-format-11 /usr/bin/clang-format
+COPY script/* /var/local/deb/
+RUN cd /var/local/deb/ && ./install.sh
 
 CMD [ "/bin/bash" ]
