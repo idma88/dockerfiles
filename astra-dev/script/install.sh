@@ -1,18 +1,13 @@
 #!/bin/bash
-clear
 
-files=files.txt
-urlTemplate="https://github.com/idma88/dockerfiles/blob/astra-se1.7/astra-dev/deb/%s?raw=true"
-
-# Install wget & git
+# Install some tools & git
 apt update -y
-apt install -y --no-install-recommends ca-certificates wget git
+apt install -y --no-install-recommends ca-certificates wget parallel git
 
 # Download DEB packets
-tr -d '\r' < $files | while read filename; do
-  fileName=$(printf $urlTemplate "$filename")
-  wget -nv -nc --no-check-certificate $fileName -O $filename
-done
+tr -d '\r' < files.txt | \
+sed 's/.*/https:\/\/github.com\/idma88\/dockerfiles\/blob\/astra-se1.7\/astra-dev\/deb\/\0?raw=true \0/' | \
+parallel --colsep ' ' wget -nv -nc --no-check-certificate {1} -O {2}
 
 # Backup sources.list
 mv -f /etc/apt/sources.list /etc/apt/sources.list.bak
@@ -41,20 +36,11 @@ apt install -y --no-install-recommends --allow-downgrades \
     zlib1g=1:1.2.11.dfsg-1 \
     zlib1g-dev
 
-
-
-
-
-
-
 # Cleanup
-apt remove -y ca-certificates wget
+apt remove -y ca-certificates wget parallel
 apt autoremove -y
 apt autoclean -y
-tr -d '\r' < $files | while read filename || [[ -n "$filename" ]]; do
-  fileName=$(printf $urlTemplate "$filename")
-  rm -f $filename
-done
+tr -d '\r' < files.txt | parallel rm -f {}
 
 # Restore sources.list
 mv -f /etc/apt/sources.list.bak /etc/apt/sources.list
