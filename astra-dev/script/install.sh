@@ -1,12 +1,16 @@
 #!/bin/bash
 
+deb_src_branch=master
+aux_packages='ca-certificates wget parallel'
+gtest_branch=release-1.12.0
+
 # Install some tools & git
 apt update -y
-apt install -y --no-install-recommends ca-certificates wget parallel git
+apt install -y --no-install-recommends $aux_packages git
 
 # Download DEB packets
 tr -d '\r' < files.txt | \
-sed 's/.*/https:\/\/github.com\/idma88\/dockerfiles\/blob\/astra-se1.7\/astra-dev\/deb\/\0?raw=true \0/' | \
+sed 's/.*/https:\/\/github.com\/idma88\/dockerfiles\/blob\/'"${deb_src_branch}"'\/astra-dev\/deb\/\0?raw=true \0/' | \
 parallel --colsep ' ' wget -nv -nc --no-check-certificate {1} -O {2}
 
 # Backup sources.list
@@ -34,10 +38,21 @@ apt install -y --no-install-recommends --allow-downgrades \
     lldb \
     qtdeclarative5-dev \
     zlib1g=1:1.2.11.dfsg-1 \
-    zlib1g-dev
+    zlib1g-dev \
+    libomp-dev
+
+# Install GoogleTest
+git clone https://github.com/google/googletest.git -b $gtest_branch
+mkdir googletest/build
+cd googletest/build
+cmake ..
+make
+make install
+cd ../..
+rm -r googletest
 
 # Cleanup
-apt remove -y ca-certificates wget parallel
+apt remove -y $aux_packages
 apt autoremove -y
 apt autoclean -y
 tr -d '\r' < files.txt | parallel rm -f {}

@@ -1,5 +1,6 @@
-# Packages
+# Content
 
+## Packages
 * gcc
 * g++
 * gdb
@@ -13,6 +14,10 @@
 * qtdeclarative5-dev
 * zlib1g=1:1.2.11.dfsg-1
 * zlib1g-dev
+* libomp-dev
+
+## Additionally
+* Google Test v1.12.0
 
 # How to get DEBs
 
