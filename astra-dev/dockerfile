@@ -2,12 +2,60 @@
 # For example: 
 #   docker run -i -t -v d:\Docker\shared\:/root/dev/ astra-dev
 
-FROM debian:10-slim
+FROM debian:9-slim
 LABEL author="idma88"
 
 ENV DISPLAY=host.docker.internal:0
 
-COPY script/* /var/local/deb/
-RUN cd /var/local/deb/ && ./install.sh
+# COPY script/* /var/local/deb/
+# RUN cd /var/local/deb/ && ./install.sh > ./install.log
+
+COPY script/etc/apt /etc/apt/
+
+# Install some tools
+RUN apt-get update -y && \
+    apt-get install -y ca-certificates
+
+# Backup sources.list
+RUN mv -f /etc/apt/sources.list /etc/apt/sources.list.bak
+
+# Update cache & Install dev tools & libs
+RUN apt-get update -y && \
+    apt-get install -y \
+        gcc \
+        g++ \
+        gdb \
+        make \
+        cmake \
+        clang \
+        clang-format \
+        clang-tidy \
+        clang-tools \
+        lldb \
+        git \
+        mc \
+        libboost-dev \
+        libboost-system-dev \
+        qtdeclarative5-dev \
+        libqt5serialport5-dev \
+        libgstreamer1.0-dev \
+        gstreamer1.0-plugins-base \
+        gstreamer1.0-plugins-good \
+        gstreamer1.0-plugins-bad \
+        gstreamer1.0-plugins-ugly \
+        gstreamer1.0-libav \
+        libgstreamer-plugins-base1.0-dev \
+        libgstreamer-plugins-bad1.0-dev \
+        gstreamer1.0-tools \
+        libavcodec-dev \
+        libavcodec57 \
+        zlib1g \
+        zlib1g-dev \
+        libgomp1
+
+# Cleanup
+RUN apt-get upgrade -y && \
+    apt-get autoremove -y && \
+    apt-get autoclean -y
 
 CMD [ "/bin/bash" ]
